@@ -1,0 +1,42 @@
+version: '2.1'
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka
+    ports:
+      - "9092"
+    depends_on:
+      - "zookeeper"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  ui_client:
+    container_name: ui_client
+    build: ./ui-client
+    tty: true
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./ui-client:/usr/src/app
+  user_service:
+    container_name: user_service
+    build: ./user-service
+    tty: true
+    ports:
+      - "3006:3006"
+    depends_on:
+      - "kafka"
+    volumes:
+      - ./user-service:/usr/src/app
+  notify_service:
+    container_name: notify_service
+    build: ./notification-service
+    tty: true
+    depends_on:
+      - "kafka"
+    volumes:
+      - ./notification-service:/usr/src/app

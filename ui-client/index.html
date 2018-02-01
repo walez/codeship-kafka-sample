@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Welcome to Atlantis</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/vue"></script>
+</head>
+
+<body>
+  <div id="app">
+    <div class="container">
+      <h1 class="text-center">{{ greeting }}</h1>
+      <div v-if="step == 1">
+        <form @submit.prevent="register" class="form">
+          <input v-model="user.first_name" name="first_name" placeholder="Enter first name" class="form-control" required>
+          <input v-model="user.last_name" name="last_name" placeholder="Enter last name" class="form-control" required>
+          <input v-model="user.email" name="email" placeholder="Enter email" type="email" class="form-control" required>
+          <input v-model="confirmEmail" name="confirm_email" placeholder="Confirm email" type="email" class="form-control" required>
+          <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+      </div>
+      <div v-else-if="step == 2">
+        <h3>Verification code sent to your email</h3>
+        <input v-model="verificationCode" name="code" placeholder="Enter verification code" type="text" class="form-control" required>
+        <button @click="verifyCode" class="btn btn-primary">Confirm</button>
+      </div>
+      <div v-else-if="step == 3">
+        <h1>Congratulations! you have successfully registered</h1>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var baseUrl = 'http://localhost:3006/api/';
+    var app = new Vue({
+      el: '#app',
+      data: {
+        greeting: 'Welcome',
+        user: {},
+        confirmEmail: "",
+        step: 1,
+        verificationCode: ""
+      },
+      methods: {
+        register: function () {
+          if (this.user.email !== this.confirmEmail) {
+            alert('Please confirm your email');
+            return;
+          }
+          var url = baseUrl + 'register';
+          var body = new URLSearchParams();
+          body.append('first_name', this.user.first_name);
+          body.append('last_name', this.user.last_name);
+          body.append('email', this.user.email);
+          var options = {
+            method: 'POST',
+            body: body
+          };
+          return fetch(url, options).then(response => response.json()).then(body => {
+            console.log('body', body);
+            this.user.id = body.data.id;
+            this.step++;
+          }).catch(err => {
+            alert('Problem with request, Please try again');
+            console.log(err)
+          })
+        },
+        verifyCode: function () {
+          if (this.verificationCode === "") {
+            alert('Please enter code');
+          }
+          var url = baseUrl + 'verify';
+          var body = new URLSearchParams();
+          body.append('uid', this.user.id);
+          body.append('code', this.verificationCode);
+          var options = {
+            method: 'POST',
+            body: body
+          };
+          return fetch(url, options).then(response => {
+            if(response.ok){
+              this.step++;
+              return
+            }
+            throw new Error('Request Issue');
+          }).catch(err => {
+            alert('Problem with request, Please try again');
+            console.log(err)
+          })
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

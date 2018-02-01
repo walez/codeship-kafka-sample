@@ -1,0 +1,17 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-rdkafka": "^2.2.1",
+    "winston": "^2.4.0",
+    "axios": "^0.17.1",
+    "dotenv": "^4.0.0"
+  }
+}
